@@ -8,33 +8,45 @@ public class Main {
 
     public static void main(String[] args) throws SQLException {
 
-        HashMap<String,String> rowsAndDefinitions = new HashMap<>();
-        rowsAndDefinitions.put("fileId", "integer PRIMARY KEY NOT NULL");
-        rowsAndDefinitions.put("state", "TEXT");
-        rowsAndDefinitions.put("filePostDate", "TIMESTAMP");
-
-
 
         //TODO: get dbfile
-        DbHandler dbHandler = new DbHandler("jdbc:sqlite:C:/prod/myfin.db");
+        DbHandler dbHandlerInpower = new DbHandler("jdbc:sqlite:C:/prod/inpower.db");
+        DbHandler dbHandlerCurse = new DbHandler("jdbc:sqlite:C:/prod/curse.db");
 
         //TODO: get tables
-        ArrayList<String> tablesList = dbHandler.getDatabaseMetaData();
+        ArrayList<String> tablesList = dbHandlerInpower.getDatabaseMetaData();
 
         //TODO: check table
-        System.out.println(dbHandler.tableHasColumn("cat","filePostDate"));
+        System.out.println(dbHandlerInpower.tableHasColumn("cat","filePostDate"));
 
         //TODO: if columns not exist add new fileId, state, filePostDate, blogName
+        /*for (Map.Entry<String, String> entry : rowsAndDefinitions.entrySet()){
+            dbHandler.addColumn("deer", entry.getKey() , entry.getValue());
+        }*/
 
-        for (Map.Entry<String, String> entry : rowsAndDefinitions.entrySet()){
-            dbHandler.addColumn("catvideo","state" , "TEXT");
+       //dbHandlerInpower.addColumn("catvideo","state" , "TEXT");
+
+        //TODO: get Image from InPowerWeEntrust db
+
+        Item item = dbHandlerInpower.returnImageFromInpower("cat","84561313_603525830379423_4602187154880098420_n");
+        //System.out.println(item);
+
+
+        //TODO: remove this item
+        //dbHandlerInpower.deleteFileFromInpowerDB("cat",item.getPostId());
+
+        //TODO: save image to CurseOfDeploy Db
+
+
+        //TODO: get singe image from InPowerWeEntrust DB for testing purposes
+
+        Item item666 = null;
+
+        for (int i = 0; i < 10; i++){
+            item666 = dbHandlerInpower.returnLastFileWithDateWhenItPostedFromInPowerDB("cat");
+            dbHandlerCurse.addImageItemToCurseDB(item666);
+            dbHandlerInpower.deleteFileFromInpowerDB(item666);
         }
-
-            dirs.add(new Blog(entry.getKey(), ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/getdirs/" + entry.getKey() + "/")
-                    .toUriString(),"not date a gate"));
-
-        dbHandler.addColumn("catvideo","state" , "TEXT");
 
     }
 }

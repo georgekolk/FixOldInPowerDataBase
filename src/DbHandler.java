@@ -88,6 +88,117 @@ public class DbHandler {
             System.out.println(e.getMessage());
         }
     }
+
+    public void deleteFileFromDB(int fileId, String tableName) {
+        try (PreparedStatement statement = this.connection.prepareStatement(
+                "DELETE FROM " + tableName + " WHERE fileId = ?")) {
+            statement.setObject(1, fileId);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteFileFromInpowerDB(String tableName, String postId) {
+        try (PreparedStatement statement = this.connection.prepareStatement(
+                "DELETE FROM " + tableName + " WHERE postId = ?")) {
+            statement.setObject(1, postId);
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteFileFromInpowerDB(Item item) {
+        try (PreparedStatement statement = this.connection.prepareStatement(
+                "DELETE FROM " + item.getBlogName() + " WHERE postId = ?")) {
+            statement.setObject(1, item.getPostId());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Item returnImageFromInpower(String tableName, String fileName){
+
+        try (Statement statement = this.connection.createStatement()) {
+
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " WHERE filenames LIKE '%"+ fileName +"%';");
+
+            System.out.println("-------------------------------------------------");
+            //return new FileWithDateWhenItPosted(resultSet.getInt("fileId"), resultSet.getString("fileName"), resultSet.getString("filePostDate"));
+            while (resultSet.next()) {
+
+                System.out.println("postId: " + resultSet.getString("postId"));
+                System.out.println("tags: " + resultSet.getString("tags"));
+                System.out.println("filenames: " + resultSet.getString("filenames"));
+                System.out.println("date: " + resultSet.getString("date"));
+
+
+                //    public Item(String blogName, String date, String postId, String tags, String filenames){
+                return new Item(tableName, resultSet.getString("date"), resultSet.getString("postId"),resultSet.getString("tags"),resultSet.getString("filenames"));
+
+
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return null;
+    }
+
+    private String prepareYourAnus(String stringToPrepareYourAnus){
+        stringToPrepareYourAnus = stringToPrepareYourAnus.replace(".", "");
+        stringToPrepareYourAnus = stringToPrepareYourAnus.replace("explore/tags/", "");
+        return stringToPrepareYourAnus;
+    }
+
+    public void createTableInpower(String tableName){
+        String sql = "CREATE TABLE IF NOT EXISTS " + this.prepareYourAnus(tableName) + " (\n" //private String blogName
+                + "	postId text NOT NULL UNIQUE,\n"
+                + "	tags text NOT NULL,\n"
+                + "	filenames text NOT NULL,\n"
+                + " date TIMESTAMP NOT NULL);";
+
+        try (Statement stmt = this.connection.createStatement()) {
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void addImageItemToCurseDB(Item item) {
+        try (PreparedStatement statement = this.connection.prepareStatement(
+                "INSERT OR IGNORE INTO " + item.getBlogName() + "(`fileName`, `filePostDate`) " +
+                        "VALUES(?, ?)")) {
+            statement.setObject(1, "RRRR" + item.getFilenames());
+            statement.setObject(2, item.getDate());
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Item returnLastFileWithDateWhenItPostedFromInPowerDB(String tableName){
+
+        try (Statement statement = this.connection.createStatement()) {
+
+            ResultSet resultSet = statement.executeQuery("SELECT * FROM " + tableName + " ORDER BY date ASC LIMIT 1");
+
+            //System.out.println(resultSet.getString("fileName"));
+
+            return new Item(tableName, resultSet.getString("date"), resultSet.getString("postId"),resultSet.getString("tags"),resultSet.getString("filenames"));
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
 }
 
 
